@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  name: Default
+  
+variables:
+  targetUrl: 'http://66.220.31.130:30741/'
+
+steps:
+- script: |
+    echo "======================================"
+    echo "Checking target URL before ZAP scan"
+    echo "Target URL: $(targetUrl)"
+    echo "Agent Name: $(Agent.Name)"
+    echo "Agent OS: $(Agent.OS)"
+    echo "======================================"
+
+    echo "1. Ping IP address..."
+    ping -c 4 66.220.31.130 || true
+
+    echo "2. Check HTTP response using curl..."
+    curl -I -L --connect-timeout 10 --max-time 30 "$(targetUrl)"
+
+    echo "3. Print HTTP status code..."
+    curl -s -o /dev/null -w "HTTP_CODE=%{http_code}\nTOTAL_TIME=%{time_total}s\n" "$(targetUrl)"
+  displayName: 'Check target URL connectivity'
+
+- task: CavSecurityPipelineCP100@1
+  inputs:
+    cavScanServiceConnection: 'cav-scan'
+    scanType: 'dynamic'
+    dynamicRunMode: 'standalone'
+    zapTarget: 'http://66.220.31.130:30741/'
+
