@@ -23,4 +23,4 @@ steps:
   inputs:
     cavScanServiceConnection: 'cav-scan'
     scanType: 'static'
-    project: 'Microservice5'
+    project: 'Boutique'
